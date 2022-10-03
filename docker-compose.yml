@@ -1,0 +1,46 @@
+version: '3.0'
+
+services:
+
+  nginx:
+    image: nginx
+    environment:
+      - VIRTUAL_HOST=site.local
+    ports:
+      - "90:80"
+    depends_on:
+      - php
+    volumes:
+      - ./docker/nginx/conf.d/default.nginx:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/
+    networks:
+      - fb_network
+
+  php:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./:/var/www/
+    networks:
+      - fb_network
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - mariadb:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "91:3306"
+    networks:
+      - fb_network
+
+networks:
+  fb_network:
+    driver: bridge
+
+#Volumes
+volumes:
+  mariadb:
+    driver: local
